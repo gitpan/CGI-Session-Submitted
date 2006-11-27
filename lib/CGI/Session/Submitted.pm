@@ -6,12 +6,12 @@ use CGI;
 #use Smart::Comments '###'; # we'll use this for debug
 use warnings;
 #this is to get version num according to cvs
-our $VERSION = sprintf "%d.%02d", q$Revision: 1.5 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 1.7 $ =~ /(\d+)/g;
 
 sub run {
 	my $self = shift;
 	$self->{preset} = shift; 
-	
+	$self->{args} = shift;	
 	
 	(ref $self->{preset}) eq 'HASH' or croak('arg must be hash ref');
 	my $preset = $self->{preset};
@@ -20,8 +20,8 @@ sub run {
 	if ($self->is_new){ 
 		### is new , setting defaults
 		$self->param( $preset );
-		### ok, assurind cookie
-		$self->_assure_cookie; # will redirect and exit.
+		### ok, assuring cookie
+		$self->_assure_cookie unless $self->{args}->{nocookie}; # will redirect and exit.
 		 # just to make a point
 	}
 
@@ -83,7 +83,7 @@ sub _assure_cookie {
 	$self->is_new or return 1;
 	
 	my $redirect = shift;
-	$redirect ||= $ENV{SCRIPT_NAME}; $redirect or croak('where to redirect to?');	
+	$redirect ||= $ENV{SCRIPT_NAME}; $redirect or croak('CGI::Session::Submitted::_assure_coooie() error: missing $ENV{SCRIPT_NAME} - where to redirect to?');	
 	
 	print $self->query->redirect(
 					-uri			=> $redirect, 
